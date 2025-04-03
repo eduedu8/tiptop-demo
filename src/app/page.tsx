@@ -1,4 +1,3 @@
-/// <reference types="google.maps" />
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -7,23 +6,23 @@ import { useRouter } from "next/navigation";
 import Head from "next/head";
 import Script from "next/script";
 
-// Create a type alias to sidestep referencing the namespace directly.
-type GoogleLatLng = any;
-
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const [address, setAddress] = useState("");
-  // Use our alias instead of "google.maps.LatLng"
-  const [selectedLocation, setSelectedLocation] = useState<GoogleLatLng | null>(null);
+  // Store the selected location from autocomplete.
+  const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLng | null>(null as unknown as google.maps.LatLng | null);
+  // When the user clicks "Analyze Property," we simulate a detailed analysis.
   const [propertyData, setPropertyData] = useState<null | {
     type: string;
     features: {
+      // Immediate opportunities:
       bandwidth: boolean;
       rooftop: boolean;
       parking: boolean;
       garden: boolean;
+      // More opportunities:
       pool: boolean;
       storage: boolean;
       car: boolean;
@@ -35,6 +34,7 @@ export default function Home() {
   const [showQuestions, setShowQuestions] = useState(false);
   const [responses, setResponses] = useState<{ [key: string]: string }>({});
 
+  // These are your simulated estimates.
   const simulatedEstimates: { [key: string]: { income: string; details: string } } = {
     bandwidth: { income: "$120/mo", details: "25.00 Mbps, FastNet, 35ms, IP: 192.168.1.2" },
     rooftop: { income: "$100/mo", details: "Solar panel potential available" },
@@ -43,9 +43,10 @@ export default function Home() {
     pool: { income: "Contact Partner", details: "160 sqft pool detected, restroom available" },
     storage: { income: "Contact Partner", details: "220 sqft warehouse detected" },
     car: { income: "Contact Partner", details: "Car monetization details unavailable" },
-    item: { income: "Contact Partner", details: "Item monetization details unavailable" }
+    item: { income: "Contact Partner", details: "Item monetization details unavailable" },
   };
 
+  // Refs for the autocomplete input and map container.
   const autocompleteInputRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -68,22 +69,22 @@ export default function Home() {
     }
   }, [mapsLoaded]);
 
-  // When a location is selected and before analysis, show the map (zoom level 12).
+  // Once a location is selected and before analysis, show the map from far (zoom level 12).
   useEffect(() => {
     if (selectedLocation && mapRef.current && !propertyData) {
       const map = new window.google.maps.Map(mapRef.current, {
         center: selectedLocation,
         zoom: 12,
-        mapTypeId: "satellite"
+        mapTypeId: "satellite",
       });
       new window.google.maps.Marker({
         position: selectedLocation,
-        map: map
+        map: map,
       });
     }
   }, [selectedLocation, propertyData]);
 
-  // Handle address submit to simulate property analysis & zoom in.
+  // When the user clicks "Analyze Property," simulate a detailed analysis and zoom in the map.
   const handleAddressSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPropertyData({
@@ -96,18 +97,18 @@ export default function Home() {
         pool: true,
         storage: true,
         car: false,
-        item: false
-      }
+        item: false,
+      },
     });
     if (mapRef.current && selectedLocation) {
       const map = new window.google.maps.Map(mapRef.current, {
         center: selectedLocation,
         zoom: 18,
-        mapTypeId: "satellite"
+        mapTypeId: "satellite",
       });
       new window.google.maps.Marker({
         position: selectedLocation,
-        map: map
+        map: map,
       });
     }
   };
@@ -118,27 +119,30 @@ export default function Home() {
     return "25.00 Mbps, FastNet, 35ms, IP: 192.168.1.2";
   };
 
-  // Run bandwidth test if needed.
+  // When "Bandwidth" is selected, run the simulated test.
   useEffect(() => {
     const runBandwidthTest = async () => {
       if (selectedOpportunities["bandwidth"] && (!responses["bandwidth"] || responses["bandwidth"] === "")) {
         const result = await testBandwidth();
-        setResponses(prev => ({ ...prev, bandwidth: result }));
+        setResponses((prev) => ({ ...prev, bandwidth: result }));
       }
     };
     runBandwidthTest();
   }, [selectedOpportunities]);
 
+  // Toggle checkbox selection.
   const handleCheckboxChange = (opportunity: string) => {
-    setSelectedOpportunities(prev => ({
+    setSelectedOpportunities((prev) => ({
       ...prev,
-      [opportunity]: !prev[opportunity]
+      [opportunity]: !prev[opportunity],
     }));
   };
 
+  // Define immediate and more opportunities.
   const immediateOpportunities = ["bandwidth", "rooftop", "parking", "garden"];
   const moreOpportunities = ["pool", "storage", "car", "item"];
 
+  // Display names for opportunities.
   const opportunityDisplayNames: { [key: string]: string } = {
     bandwidth: "Bandwidth",
     rooftop: "Rooftop",
@@ -147,9 +151,10 @@ export default function Home() {
     pool: "Pool",
     storage: "Storage",
     car: "Car",
-    item: "Item"
+    item: "Item",
   };
 
+  // Prompts for additional information.
   const opportunityQuestions: { [key: string]: string } = {
     bandwidth: "We have automatically run an internet test. If needed, please verify or update these details.",
     rooftop: "Please upload your utility bill or provide your energy usage details.",
@@ -158,58 +163,78 @@ export default function Home() {
     pool: "Describe the pool (size, condition, additional features like an outside restroom).",
     storage: "Detail your available storage space.",
     car: "Provide details about your car (make, model, year).",
-    item: "List the items you want to monetize with a description and condition."
+    item: "List the items you want to monetize with a description and condition.",
   };
 
+  // When the additional information form is submitted, redirect to sign in if not signed in,
+  // then to the dashboard.
   const handleQuestionsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Additional Information Submitted:", responses);
+    // Here, send the collected data to your back end if needed.
+
     if (!session) {
+      // If the user is not signed in, redirect them to sign in with a callback URL.
       signIn("google", { callbackUrl: "/dashboard" });
     } else {
+      // If signed in, navigate directly to the dashboard.
       router.push("/dashboard");
     }
   };
 
+  // Mark maps as loaded when the Google Maps script finishes loading.
   const handleScriptLoad = () => {
     setMapsLoaded(true);
   };
 
   return (
-    <div className="min-h-screen p-6" style={{ backgroundColor: "#FFFDED", color: "#552B1B", fontFamily: '"Work Sans", sans-serif' }}>
+    <div
+      className="min-h-screen p-6"
+      style={{ backgroundColor: "#FFFDED", color: "#552B1B", fontFamily: '"Work Sans", sans-serif' }}
+    >
       <Head>
         <title>Kolonia - Monetize Your Assets</title>
         <meta name="description" content="Monetize your assets and property with Kolonia" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Fahkwang:wght@700&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fahkwang:wght@700&family=Work+Sans:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
       </Head>
+
+      {/* Load Google Maps Script */}
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
         strategy="afterInteractive"
         onLoad={handleScriptLoad}
       />
-      <header className="flex justify-between items-center mb-6" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
-        <div>
-          <span style={{ fontSize: "2rem", color: "#552B1B" }}>tiptop</span>
-          <span style={{ fontSize: "1rem", color: "#AA94E2" }}> by kolonia</span>
-        </div>
-        <div>
-          {session ? (
-            <button onClick={() => signIn("google")} className="bg-[#AA94E2] text-white py-2 px-4 rounded">
-              Account
-            </button>
-          ) : (
-            <button onClick={() => signIn("google", { callbackUrl: "/dashboard" })} className="bg-[#AA94E2] text-white py-2 px-4 rounded">
-              Sign In
-            </button>
-          )}
-        </div>
-      </header>
+
+      {/* Header */}
+      <header className="flex justify-between items-center mb-6">
+  <div style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+    <span style={{ fontSize: '2rem', color: '#552B1B' }}>tiptop</span>
+    <span style={{ fontSize: '1rem', color: '#AA94E2' }}> by kolonia</span>
+  </div>
+  <div>
+    {session ? (
+      <button onClick={() => signIn("google")} className="bg-[#AA94E2] text-white py-2 px-4 rounded">
+        Account
+      </button>
+    ) : (
+      <button onClick={() => signIn("google", { callbackUrl: "/dashboard" })} className="bg-[#AA94E2] text-white py-2 px-4 rounded">
+        Sign In
+      </button>
+    )}
+  </div>
+</header>
+
+      {/* Main Content */}
       <main>
+        {/* Address Input & Analysis Form */}
         <section className="mb-8">
           <h2 className="text-3xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
-            Discover Your Property&apos;s Earning Potential
+            Discover Your Property's Earning Potential
           </h2>
           <form onSubmit={handleAddressSubmit} className="flex flex-col sm:flex-row items-center gap-4">
             <input
@@ -221,21 +246,34 @@ export default function Home() {
               className="p-3 border border-gray-300 rounded flex-1"
               style={{ fontSize: "1rem", color: "#552B1B" }}
             />
-            <button type="submit" className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+            <button
+              type="submit"
+              className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
+              style={{ fontFamily: '"Fahkwang", sans-serif' }}
+            >
               Analyze Property
             </button>
           </form>
         </section>
+
+        {/* Google Map */}
         <section className="mb-8">
-          <div ref={mapRef} className="w-full h-96 border border-gray-300 rounded flex items-center justify-center">
+          <div
+            ref={mapRef}
+            className="w-full h-96 border border-gray-300 rounded flex items-center justify-center"
+          >
             {!mapsLoaded && <p>Loading map...</p>}
           </div>
         </section>
+
+        {/* Monetization Opportunities */}
         {propertyData && (
           <section className="mb-8">
             <h2 className="text-4xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
               Monetization Opportunities
             </h2>
+
+            {/* Immediate Opportunities */}
             <div className="mb-6">
               <h3 className="text-2xl mb-2" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
                 Immediate Opportunities
@@ -259,6 +297,8 @@ export default function Home() {
                 ))}
               </div>
             </div>
+
+            {/* More Opportunities */}
             <div className="mb-6">
               <h3 className="text-2xl mb-2" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
                 More Opportunities
@@ -282,13 +322,20 @@ export default function Home() {
                 ))}
               </div>
             </div>
+
             <div>
-              <button onClick={() => setShowQuestions(true)} className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+              <button
+                onClick={() => setShowQuestions(true)}
+                className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
+                style={{ fontFamily: '"Fahkwang", sans-serif' }}
+              >
                 Continue
               </button>
             </div>
           </section>
         )}
+
+        {/* Additional Information Section */}
         {showQuestions && (
           <section className="mb-8">
             <h2 className="text-4xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
@@ -302,17 +349,25 @@ export default function Home() {
                     <label className="mb-1" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
                       {opportunityDisplayNames[opp]}:
                     </label>
-                    <p className="text-xs text-gray-600 mb-1">{simulatedEstimates[opp]?.details}</p>
+                    <p className="text-xs text-gray-600 mb-1">
+                      {simulatedEstimates[opp]?.details}
+                    </p>
                     <textarea
                       placeholder={opportunityQuestions[opp]}
                       value={responses[opp] || ""}
-                      onChange={(e) => setResponses(prev => ({ ...prev, [opp]: e.target.value }))}
+                      onChange={(e) =>
+                        setResponses((prev) => ({ ...prev, [opp]: e.target.value }))
+                      }
                       className="p-3 border border-gray-300 rounded"
                       rows={3}
                     />
                   </div>
                 ))}
-              <button type="submit" className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+              <button
+                type="submit"
+                className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
+                style={{ fontFamily: '"Fahkwang", sans-serif' }}
+              >
                 Submit Information
               </button>
             </form>
