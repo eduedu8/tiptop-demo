@@ -1,10 +1,9 @@
-"use client"; // Ensure it's a client component!
-
+"use client";
 import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html>
+    <html lang="en">
       <head>
         <title>Kolonia - Monetization</title>
       </head>
