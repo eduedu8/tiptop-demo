@@ -12,7 +12,7 @@ export default function Home() {
 
   const [address, setAddress] = useState("");
   // Store the selected location from autocomplete.
-  const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLng | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<null | typeof google.maps.LatLng>(null);
   // When the user clicks "Analyze Property," we simulate a detailed analysis.
   const [propertyData, setPropertyData] = useState<null | {
     type: string;
@@ -196,7 +196,7 @@ export default function Home() {
         <title>Kolonia - Monetize Your Assets</title>
         <meta name="description" content="Monetize your assets and property with Kolonia" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Fahkwang:wght@700&family=Work+Sans:wght@400;500&display=swap"
           rel="stylesheet"
