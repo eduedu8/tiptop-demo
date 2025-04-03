@@ -339,7 +339,7 @@ export default function Home() {
         {showQuestions && (
           <section className="mb-8">
             <h2 className="text-4xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
-              Additional Information Required
+              Additional Information Required needed
             </h2>
             <form onSubmit={handleQuestionsSubmit} className="flex flex-col gap-4">
               {Object.keys(selectedOpportunities)
