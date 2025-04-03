@@ -6,26 +6,23 @@ import { useRouter } from "next/navigation";
 import Head from "next/head";
 import Script from "next/script";
 
-// Declare a global variable for google to satisfy TypeScript.
-declare var google: any;
+// Define a type alias for Google Maps LatLng so that we don't reference the missing namespace.
+type GoogleLatLng = any;
 
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const [address, setAddress] = useState("");
-  // Store the selected location from autocomplete.
-  const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLng | null>(null);
-  // When the user clicks "Analyze Property," we simulate a detailed analysis.
+  // Use the alias instead of "google.maps.LatLng"
+  const [selectedLocation, setSelectedLocation] = useState<GoogleLatLng | null>(null);
   const [propertyData, setPropertyData] = useState<null | {
     type: string;
     features: {
-      // Immediate opportunities:
       bandwidth: boolean;
       rooftop: boolean;
       parking: boolean;
       garden: boolean;
-      // More opportunities:
       pool: boolean;
       storage: boolean;
       car: boolean;
@@ -37,7 +34,6 @@ export default function Home() {
   const [showQuestions, setShowQuestions] = useState(false);
   const [responses, setResponses] = useState<{ [key: string]: string }>({});
 
-  // These are your simulated estimates.
   const simulatedEstimates: { [key: string]: { income: string; details: string } } = {
     bandwidth: { income: "$120/mo", details: "25.00 Mbps, FastNet, 35ms, IP: 192.168.1.2" },
     rooftop: { income: "$100/mo", details: "Solar panel potential available" },
@@ -49,7 +45,7 @@ export default function Home() {
     item: { income: "Contact Partner", details: "Item monetization details unavailable" },
   };
 
-  // Refs for the autocomplete input and map container.
+  // Refs for autocomplete input and map container.
   const autocompleteInputRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +68,7 @@ export default function Home() {
     }
   }, [mapsLoaded]);
 
-  // Once a location is selected and before analysis, show the map from far (zoom level 12).
+  // Show the map with a default zoom if a location is selected.
   useEffect(() => {
     if (selectedLocation && mapRef.current && !propertyData) {
       const map = new window.google.maps.Map(mapRef.current, {
@@ -87,7 +83,7 @@ export default function Home() {
     }
   }, [selectedLocation, propertyData]);
 
-  // When the user clicks "Analyze Property," simulate a detailed analysis and zoom in the map.
+  // When "Analyze Property" is clicked, simulate analysis and zoom the map.
   const handleAddressSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPropertyData({
@@ -116,13 +112,12 @@ export default function Home() {
     }
   };
 
-  // Simulated bandwidth test.
   const testBandwidth = async (): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     return "25.00 Mbps, FastNet, 35ms, IP: 192.168.1.2";
   };
 
-  // When "Bandwidth" is selected, run the simulated test.
+  // Run the simulated bandwidth test when needed.
   useEffect(() => {
     const runBandwidthTest = async () => {
       if (selectedOpportunities["bandwidth"] && (!responses["bandwidth"] || responses["bandwidth"] === "")) {
@@ -133,7 +128,6 @@ export default function Home() {
     runBandwidthTest();
   }, [selectedOpportunities]);
 
-  // Toggle checkbox selection.
   const handleCheckboxChange = (opportunity: string) => {
     setSelectedOpportunities((prev) => ({
       ...prev,
@@ -141,11 +135,9 @@ export default function Home() {
     }));
   };
 
-  // Define immediate and more opportunities.
   const immediateOpportunities = ["bandwidth", "rooftop", "parking", "garden"];
   const moreOpportunities = ["pool", "storage", "car", "item"];
 
-  // Display names for opportunities.
   const opportunityDisplayNames: { [key: string]: string } = {
     bandwidth: "Bandwidth",
     rooftop: "Rooftop",
@@ -157,7 +149,6 @@ export default function Home() {
     item: "Item",
   };
 
-  // Prompts for additional information.
   const opportunityQuestions: { [key: string]: string } = {
     bandwidth: "We have automatically run an internet test. If needed, please verify or update these details.",
     rooftop: "Please upload your utility bill or provide your energy usage details.",
@@ -169,7 +160,6 @@ export default function Home() {
     item: "List the items you want to monetize with a description and condition.",
   };
 
-  // When the additional information form is submitted, handle submission.
   const handleQuestionsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Additional Information Submitted:", responses);
@@ -180,7 +170,6 @@ export default function Home() {
     }
   };
 
-  // Mark maps as loaded when the Google Maps script finishes loading.
   const handleScriptLoad = () => {
     setMapsLoaded(true);
   };
