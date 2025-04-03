@@ -12,7 +12,7 @@ export default function Home() {
 
   const [address, setAddress] = useState("");
   // Store the selected location from autocomplete.
-  const [selectedLocation, setSelectedLocation] = useState<null | typeof google.maps.LatLng>(null);
+  const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLng | null>(null as unknown as google.maps.LatLng | null);
   // When the user clicks "Analyze Property," we simulate a detailed analysis.
   const [propertyData, setPropertyData] = useState<null | {
     type: string;
