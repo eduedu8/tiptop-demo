@@ -12,19 +12,16 @@ export default function Home() {
   const router = useRouter();
 
   const [address, setAddress] = useState("");
-  // Store the selected location from autocomplete.
-  // Now using the installed google.maps types without extra casting.
-  const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLng | null>(null);
+  // Workaround: use "any" instead of "google.maps.LatLng" to bypass missing namespace type.
+  const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
   // When the user clicks "Analyze Property," we simulate a detailed analysis.
   const [propertyData, setPropertyData] = useState<null | {
     type: string;
     features: {
-      // Immediate opportunities:
       bandwidth: boolean;
       rooftop: boolean;
       parking: boolean;
       garden: boolean;
-      // More opportunities:
       pool: boolean;
       storage: boolean;
       car: boolean;
@@ -70,7 +67,7 @@ export default function Home() {
     }
   }, [mapsLoaded]);
 
-  // Once a location is selected and before analysis, show the map from far (zoom level 12).
+  // Once a location is selected and before analysis, show the map from afar (zoom level 12).
   useEffect(() => {
     if (selectedLocation && mapRef.current && !propertyData) {
       const map = new window.google.maps.Map(mapRef.current, {
@@ -85,7 +82,7 @@ export default function Home() {
     }
   }, [selectedLocation, propertyData]);
 
-  // When the user clicks "Analyze Property," simulate a detailed analysis and zoom in the map.
+  // When the user clicks "Analyze Property," simulate detailed analysis and zoom the map.
   const handleAddressSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPropertyData({
@@ -120,6 +117,7 @@ export default function Home() {
     return "25.00 Mbps, FastNet, 35ms, IP: 192.168.1.2";
   };
 
+  // When "Bandwidth" is selected, run the simulated test.
   useEffect(() => {
     const runBandwidthTest = async () => {
       if (selectedOpportunities["bandwidth"] && (!responses["bandwidth"] || responses["bandwidth"] === "")) {
