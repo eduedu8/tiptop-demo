@@ -1,10 +1,6 @@
-import "./styles/globals.css";
-import { Providers } from "./providers";
+// src/app/layout.tsx
 
-export const metadata = {
-  title: "Kolonia - Monetize Your Assets",
-  description: "Monetize your assets and property with Kolonia",
-};
+import React from "react";
 
 export default function RootLayout({
   children,
@@ -12,10 +8,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <Providers>{children}</Providers>
-      </body>
+    <html>
+      <head>
+        <title>Kolonia - Monetize Your Assets</title>
+      </head>
+      <body>{children}</body>
     </html>
   );
 }
