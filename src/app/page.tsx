@@ -6,21 +6,16 @@ import { useRouter } from "next/navigation";
 import Head from "next/head";
 import Script from "next/script";
 
+// Declare a global variable for google to satisfy TypeScript.
+declare var google: any;
+
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const [address, setAddress] = useState("");
   // Store the selected location from autocomplete.
-  import { useEffect, useState } from "react";
-
-const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLng | null>(null);
-
-useEffect(() => {
-  if (typeof window !== "undefined" && window.google && window.google.maps) {
-    setSelectedLocation(new window.google.maps.LatLng(0, 0));
-  }
-}, []);
+  const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLng | null>(null);
   // When the user clicks "Analyze Property," we simulate a detailed analysis.
   const [propertyData, setPropertyData] = useState<null | {
     type: string;
@@ -174,18 +169,13 @@ useEffect(() => {
     item: "List the items you want to monetize with a description and condition.",
   };
 
-  // When the additional information form is submitted, redirect to sign in if not signed in,
-  // then to the dashboard.
+  // When the additional information form is submitted, handle submission.
   const handleQuestionsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Additional Information Submitted:", responses);
-    // Here, send the collected data to your back end if needed.
-
     if (!session) {
-      // If the user is not signed in, redirect them to sign in with a callback URL.
       signIn("google", { callbackUrl: "/dashboard" });
     } else {
-      // If signed in, navigate directly to the dashboard.
       router.push("/dashboard");
     }
   };
@@ -211,38 +201,34 @@ useEffect(() => {
         />
       </Head>
 
-      {/* Load Google Maps Script */}
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
         strategy="afterInteractive"
         onLoad={handleScriptLoad}
       />
 
-      {/* Header */}
       <header className="flex justify-between items-center mb-6">
-  <div style={{ fontFamily: '"Fahkwang", sans-serif' }}>
-    <span style={{ fontSize: '2rem', color: '#552B1B' }}>tiptop</span>
-    <span style={{ fontSize: '1rem', color: '#AA94E2' }}> by kolonia</span>
-  </div>
-  <div>
-    {session ? (
-      <button onClick={() => signIn("google")} className="bg-[#AA94E2] text-white py-2 px-4 rounded">
-        Account
-      </button>
-    ) : (
-      <button onClick={() => signIn("google", { callbackUrl: "/dashboard" })} className="bg-[#AA94E2] text-white py-2 px-4 rounded">
-        Sign In
-      </button>
-    )}
-  </div>
-</header>
+        <div style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+          <span style={{ fontSize: "2rem", color: "#552B1B" }}>tiptop</span>
+          <span style={{ fontSize: "1rem", color: "#AA94E2" }}> by kolonia</span>
+        </div>
+        <div>
+          {session ? (
+            <button onClick={() => signIn("google")} className="bg-[#AA94E2] text-white py-2 px-4 rounded">
+              Account
+            </button>
+          ) : (
+            <button onClick={() => signIn("google", { callbackUrl: "/dashboard" })} className="bg-[#AA94E2] text-white py-2 px-4 rounded">
+              Sign In
+            </button>
+          )}
+        </div>
+      </header>
 
-      {/* Main Content */}
       <main>
-        {/* Address Input & Analysis Form */}
         <section className="mb-8">
           <h2 className="text-3xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
-            Discover Your Property's Earning Potential
+            Discover Your Property&apos;s Earning Potential
           </h2>
           <form onSubmit={handleAddressSubmit} className="flex flex-col sm:flex-row items-center gap-4">
             <input
@@ -254,34 +240,23 @@ useEffect(() => {
               className="p-3 border border-gray-300 rounded flex-1"
               style={{ fontSize: "1rem", color: "#552B1B" }}
             />
-            <button
-              type="submit"
-              className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
-              style={{ fontFamily: '"Fahkwang", sans-serif' }}
-            >
+            <button type="submit" className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
               Analyze Property
             </button>
           </form>
         </section>
 
-        {/* Google Map */}
         <section className="mb-8">
-          <div
-            ref={mapRef}
-            className="w-full h-96 border border-gray-300 rounded flex items-center justify-center"
-          >
+          <div ref={mapRef} className="w-full h-96 border border-gray-300 rounded flex items-center justify-center">
             {!mapsLoaded && <p>Loading map...</p>}
           </div>
         </section>
 
-        {/* Monetization Opportunities */}
         {propertyData && (
           <section className="mb-8">
             <h2 className="text-4xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
               Monetization Opportunities
             </h2>
-
-            {/* Immediate Opportunities */}
             <div className="mb-6">
               <h3 className="text-2xl mb-2" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
                 Immediate Opportunities
@@ -306,7 +281,6 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* More Opportunities */}
             <div className="mb-6">
               <h3 className="text-2xl mb-2" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
                 More Opportunities
@@ -332,18 +306,13 @@ useEffect(() => {
             </div>
 
             <div>
-              <button
-                onClick={() => setShowQuestions(true)}
-                className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
-                style={{ fontFamily: '"Fahkwang", sans-serif' }}
-              >
+              <button onClick={() => setShowQuestions(true)} className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
                 Continue
               </button>
             </div>
           </section>
         )}
 
-        {/* Additional Information Section */}
         {showQuestions && (
           <section className="mb-8">
             <h2 className="text-4xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
@@ -357,25 +326,17 @@ useEffect(() => {
                     <label className="mb-1" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
                       {opportunityDisplayNames[opp]}:
                     </label>
-                    <p className="text-xs text-gray-600 mb-1">
-                      {simulatedEstimates[opp]?.details}
-                    </p>
+                    <p className="text-xs text-gray-600 mb-1">{simulatedEstimates[opp]?.details}</p>
                     <textarea
                       placeholder={opportunityQuestions[opp]}
                       value={responses[opp] || ""}
-                      onChange={(e) =>
-                        setResponses((prev) => ({ ...prev, [opp]: e.target.value }))
-                      }
+                      onChange={(e) => setResponses((prev) => ({ ...prev, [opp]: e.target.value }))}
                       className="p-3 border border-gray-300 rounded"
                       rows={3}
                     />
                   </div>
                 ))}
-              <button
-                type="submit"
-                className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
-                style={{ fontFamily: '"Fahkwang", sans-serif' }}
-              >
+              <button type="submit" className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
                 Submit Information
               </button>
             </form>
