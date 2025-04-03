@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -6,23 +7,24 @@ import { useRouter } from "next/navigation";
 import Head from "next/head";
 import Script from "next/script";
 
-// Define a type alias for Google Maps LatLng so that we don't reference the missing namespace.
-type GoogleLatLng = any;
-
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const [address, setAddress] = useState("");
-  // Use the alias instead of "google.maps.LatLng"
-  const [selectedLocation, setSelectedLocation] = useState<GoogleLatLng | null>(null);
+  // Store the selected location from autocomplete.
+  // Now using the installed google.maps types without extra casting.
+  const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLng | null>(null);
+  // When the user clicks "Analyze Property," we simulate a detailed analysis.
   const [propertyData, setPropertyData] = useState<null | {
     type: string;
     features: {
+      // Immediate opportunities:
       bandwidth: boolean;
       rooftop: boolean;
       parking: boolean;
       garden: boolean;
+      // More opportunities:
       pool: boolean;
       storage: boolean;
       car: boolean;
@@ -45,7 +47,7 @@ export default function Home() {
     item: { income: "Contact Partner", details: "Item monetization details unavailable" },
   };
 
-  // Refs for autocomplete input and map container.
+  // Refs for the autocomplete input and map container.
   const autocompleteInputRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -68,7 +70,7 @@ export default function Home() {
     }
   }, [mapsLoaded]);
 
-  // Show the map with a default zoom if a location is selected.
+  // Once a location is selected and before analysis, show the map from far (zoom level 12).
   useEffect(() => {
     if (selectedLocation && mapRef.current && !propertyData) {
       const map = new window.google.maps.Map(mapRef.current, {
@@ -83,7 +85,7 @@ export default function Home() {
     }
   }, [selectedLocation, propertyData]);
 
-  // When "Analyze Property" is clicked, simulate analysis and zoom the map.
+  // When the user clicks "Analyze Property," simulate a detailed analysis and zoom in the map.
   const handleAddressSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPropertyData({
@@ -112,12 +114,12 @@ export default function Home() {
     }
   };
 
+  // Simulated bandwidth test.
   const testBandwidth = async (): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     return "25.00 Mbps, FastNet, 35ms, IP: 192.168.1.2";
   };
 
-  // Run the simulated bandwidth test when needed.
   useEffect(() => {
     const runBandwidthTest = async () => {
       if (selectedOpportunities["bandwidth"] && (!responses["bandwidth"] || responses["bandwidth"] === "")) {
@@ -295,7 +297,11 @@ export default function Home() {
             </div>
 
             <div>
-              <button onClick={() => setShowQuestions(true)} className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+              <button
+                onClick={() => setShowQuestions(true)}
+                className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
+                style={{ fontFamily: '"Fahkwang", sans-serif' }}
+              >
                 Continue
               </button>
             </div>
@@ -325,7 +331,11 @@ export default function Home() {
                     />
                   </div>
                 ))}
-              <button type="submit" className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+              <button
+                type="submit"
+                className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
+                style={{ fontFamily: '"Fahkwang", sans-serif' }}
+              >
                 Submit Information
               </button>
             </form>
