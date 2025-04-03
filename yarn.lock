@@ -116,6 +116,11 @@
   dependencies:
     tslib "^2.8.0"
 
+"@types/googlemaps@^3.43.3":
+  version "3.43.3"
+  resolved "https://registry.npmjs.org/@types/googlemaps/-/googlemaps-3.43.3.tgz"
+  integrity sha512-ZWNoz/O8MPEpiajvj7QiqCY8tTLFNqNZ/a+s+zTV58wFVNAvvqV4bdGfnsjTb5Cs4V6wEsLrX8XRhmnyYJ2Tdg==
+
 "@types/node@^22.13.17":
   version "22.13.17"
   resolved "https://registry.npmjs.org/@types/node/-/node-22.13.17.tgz"
