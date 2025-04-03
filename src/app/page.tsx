@@ -7,14 +7,16 @@ import { useRouter } from "next/navigation";
 import Head from "next/head";
 import Script from "next/script";
 
+// Create a type alias to sidestep referencing the namespace directly.
+type GoogleLatLng = any;
+
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const [address, setAddress] = useState("");
-  // Workaround: use "any" instead of "google.maps.LatLng" to bypass missing namespace type.
-  const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
-  // When the user clicks "Analyze Property," we simulate a detailed analysis.
+  // Use our alias instead of "google.maps.LatLng"
+  const [selectedLocation, setSelectedLocation] = useState<GoogleLatLng | null>(null);
   const [propertyData, setPropertyData] = useState<null | {
     type: string;
     features: {
@@ -41,10 +43,9 @@ export default function Home() {
     pool: { income: "Contact Partner", details: "160 sqft pool detected, restroom available" },
     storage: { income: "Contact Partner", details: "220 sqft warehouse detected" },
     car: { income: "Contact Partner", details: "Car monetization details unavailable" },
-    item: { income: "Contact Partner", details: "Item monetization details unavailable" },
+    item: { income: "Contact Partner", details: "Item monetization details unavailable" }
   };
 
-  // Refs for the autocomplete input and map container.
   const autocompleteInputRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -67,22 +68,22 @@ export default function Home() {
     }
   }, [mapsLoaded]);
 
-  // Once a location is selected and before analysis, show the map from afar (zoom level 12).
+  // When a location is selected and before analysis, show the map (zoom level 12).
   useEffect(() => {
     if (selectedLocation && mapRef.current && !propertyData) {
       const map = new window.google.maps.Map(mapRef.current, {
         center: selectedLocation,
         zoom: 12,
-        mapTypeId: "satellite",
+        mapTypeId: "satellite"
       });
       new window.google.maps.Marker({
         position: selectedLocation,
-        map: map,
+        map: map
       });
     }
   }, [selectedLocation, propertyData]);
 
-  // When the user clicks "Analyze Property," simulate detailed analysis and zoom the map.
+  // Handle address submit to simulate property analysis & zoom in.
   const handleAddressSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPropertyData({
@@ -95,18 +96,18 @@ export default function Home() {
         pool: true,
         storage: true,
         car: false,
-        item: false,
-      },
+        item: false
+      }
     });
     if (mapRef.current && selectedLocation) {
       const map = new window.google.maps.Map(mapRef.current, {
         center: selectedLocation,
         zoom: 18,
-        mapTypeId: "satellite",
+        mapTypeId: "satellite"
       });
       new window.google.maps.Marker({
         position: selectedLocation,
-        map: map,
+        map: map
       });
     }
   };
@@ -117,21 +118,21 @@ export default function Home() {
     return "25.00 Mbps, FastNet, 35ms, IP: 192.168.1.2";
   };
 
-  // When "Bandwidth" is selected, run the simulated test.
+  // Run bandwidth test if needed.
   useEffect(() => {
     const runBandwidthTest = async () => {
       if (selectedOpportunities["bandwidth"] && (!responses["bandwidth"] || responses["bandwidth"] === "")) {
         const result = await testBandwidth();
-        setResponses((prev) => ({ ...prev, bandwidth: result }));
+        setResponses(prev => ({ ...prev, bandwidth: result }));
       }
     };
     runBandwidthTest();
   }, [selectedOpportunities]);
 
   const handleCheckboxChange = (opportunity: string) => {
-    setSelectedOpportunities((prev) => ({
+    setSelectedOpportunities(prev => ({
       ...prev,
-      [opportunity]: !prev[opportunity],
+      [opportunity]: !prev[opportunity]
     }));
   };
 
@@ -146,7 +147,7 @@ export default function Home() {
     pool: "Pool",
     storage: "Storage",
     car: "Car",
-    item: "Item",
+    item: "Item"
   };
 
   const opportunityQuestions: { [key: string]: string } = {
@@ -157,7 +158,7 @@ export default function Home() {
     pool: "Describe the pool (size, condition, additional features like an outside restroom).",
     storage: "Detail your available storage space.",
     car: "Provide details about your car (make, model, year).",
-    item: "List the items you want to monetize with a description and condition.",
+    item: "List the items you want to monetize with a description and condition."
   };
 
   const handleQuestionsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -175,29 +176,21 @@ export default function Home() {
   };
 
   return (
-    <div
-      className="min-h-screen p-6"
-      style={{ backgroundColor: "#FFFDED", color: "#552B1B", fontFamily: '"Work Sans", sans-serif' }}
-    >
+    <div className="min-h-screen p-6" style={{ backgroundColor: "#FFFDED", color: "#552B1B", fontFamily: '"Work Sans", sans-serif' }}>
       <Head>
         <title>Kolonia - Monetize Your Assets</title>
         <meta name="description" content="Monetize your assets and property with Kolonia" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Fahkwang:wght@700&family=Work+Sans:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Fahkwang:wght@700&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet" />
       </Head>
-
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
         strategy="afterInteractive"
         onLoad={handleScriptLoad}
       />
-
-      <header className="flex justify-between items-center mb-6">
-        <div style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+      <header className="flex justify-between items-center mb-6" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
+        <div>
           <span style={{ fontSize: "2rem", color: "#552B1B" }}>tiptop</span>
           <span style={{ fontSize: "1rem", color: "#AA94E2" }}> by kolonia</span>
         </div>
@@ -213,7 +206,6 @@ export default function Home() {
           )}
         </div>
       </header>
-
       <main>
         <section className="mb-8">
           <h2 className="text-3xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
@@ -234,13 +226,11 @@ export default function Home() {
             </button>
           </form>
         </section>
-
         <section className="mb-8">
           <div ref={mapRef} className="w-full h-96 border border-gray-300 rounded flex items-center justify-center">
             {!mapsLoaded && <p>Loading map...</p>}
           </div>
         </section>
-
         {propertyData && (
           <section className="mb-8">
             <h2 className="text-4xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
@@ -269,7 +259,6 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
             <div className="mb-6">
               <h3 className="text-2xl mb-2" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
                 More Opportunities
@@ -293,19 +282,13 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
             <div>
-              <button
-                onClick={() => setShowQuestions(true)}
-                className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
-                style={{ fontFamily: '"Fahkwang", sans-serif' }}
-              >
+              <button onClick={() => setShowQuestions(true)} className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
                 Continue
               </button>
             </div>
           </section>
         )}
-
         {showQuestions && (
           <section className="mb-8">
             <h2 className="text-4xl mb-4" style={{ fontFamily: '"Fahkwang", sans-serif', color: "#AA94E2" }}>
@@ -323,17 +306,13 @@ export default function Home() {
                     <textarea
                       placeholder={opportunityQuestions[opp]}
                       value={responses[opp] || ""}
-                      onChange={(e) => setResponses((prev) => ({ ...prev, [opp]: e.target.value }))}
+                      onChange={(e) => setResponses(prev => ({ ...prev, [opp]: e.target.value }))}
                       className="p-3 border border-gray-300 rounded"
                       rows={3}
                     />
                   </div>
                 ))}
-              <button
-                type="submit"
-                className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl"
-                style={{ fontFamily: '"Fahkwang", sans-serif' }}
-              >
+              <button type="submit" className="bg-[#AA94E2] text-white py-2 px-4 rounded text-xl" style={{ fontFamily: '"Fahkwang", sans-serif' }}>
                 Submit Information
               </button>
             </form>
