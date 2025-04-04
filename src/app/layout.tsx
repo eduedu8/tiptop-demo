@@ -1,4 +1,5 @@
-"use client";
+"use client"; // Required for components using hooks
+
 import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
