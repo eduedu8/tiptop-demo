@@ -2,3 +2,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    font-family: 'Work Sans', sans-serif;
+    background-color: #FFFDED;
+    color: #552B1B;
+  }
